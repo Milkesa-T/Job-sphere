@@ -3,9 +3,8 @@
 Job Sphere is a modern, full-stack web application designed to seamlessly connect job seekers with top employers. Built with React and Node.js, it offers a fast, dynamic, and beautiful UI with advanced backend analytics and secure user management.
 
 ## 📹 Project Walkthrough Demonstration
-
-> **[Video Demo Goes Here]**
-> _(Mentors: Replace this block with your screen recording or a Loom video link that demonstrates logging in, searching for jobs, the companies page, and the admin dashboard.)_
+## check out this video to watch the system functionalities
+[ https://github.com/user-attachments/assets/95f990f4-9e20-4954-a399-61d020c720e2 ]
 
 ## ✨ Features
 
