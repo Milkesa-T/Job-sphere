@@ -52,6 +52,37 @@ export default function JobDetails() {
     }
   };
 
+  const handleEditJob = async () => {
+    if (!job) return;
+    const newLocation = window.prompt("Enter new job location:", job.location);
+    if (newLocation === null) return;
+    const newType = window.prompt("Enter new job type (e.g. Full-time, Remote, Contract):", job.type);
+    if (newType === null) return;
+    const newExperience = window.prompt("Enter new experience level (e.g. Junior, Senior):", job.experienceLevel || "Mid Level");
+    if (newExperience === null) return;
+
+    try {
+      const jobId = (job as any)._id || job.id;
+      const res = await fetch(`/api/jobs/${jobId}`, {
+         method: "PUT",
+         headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${auth.user?.token}`
+         },
+         body: JSON.stringify({ location: newLocation, type: newType, experienceLevel: newExperience })
+      });
+      if (res.ok) {
+         dispatch(fetchJobs());
+         alert("Job updated successfully!");
+      } else {
+         alert("Failed to update job.");
+      }
+    } catch (e: any) {
+      console.error(e);
+      alert("Error updating job.");
+    }
+  };
+
   const isSaved = auth.user?.savedJobs?.some((sJob: any) => 
     (typeof sJob === 'object' ? sJob._id : sJob) === ((job as any)?._id || job?.id)
   ) || job?.isBookMarked;
@@ -152,15 +183,24 @@ export default function JobDetails() {
                   fill={isSaved ? "currentColor" : "none"}
                 />
               </button>
-              <button 
-                onClick={handleApply}
-                disabled={isApplying || applySuccess}
-                className={`flex-1 md:flex-none px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg ${
-                  applySuccess ? "bg-green-500 text-white shadow-green-100 dark:shadow-green-900/20" : "bg-primary text-white hover:bg-primary-dark shadow-blue-100 dark:shadow-blue-900/20"
-                }`}
-              >
-                {isApplying ? "Applying..." : applySuccess ? "Applied" : "Apply Now"}
-              </button>
+              {auth.user?.role === "admin" ? (
+                <button 
+                  onClick={handleEditJob}
+                  className="flex-1 md:flex-none px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg bg-purple-500 text-white hover:bg-purple-600 shadow-purple-100 dark:shadow-purple-900/20"
+                >
+                  Edit Job Elements
+                </button>
+              ) : (
+                <button 
+                  onClick={handleApply}
+                  disabled={isApplying || applySuccess}
+                  className={`flex-1 md:flex-none px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg ${
+                    applySuccess ? "bg-green-500 text-white shadow-green-100 dark:shadow-green-900/20" : "bg-primary text-white hover:bg-primary-dark shadow-blue-100 dark:shadow-blue-900/20"
+                  }`}
+                >
+                  {isApplying ? "Applying..." : applySuccess ? "Applied" : "Apply Now"}
+                </button>
+              )}
             </div>
           </div>
         </div>

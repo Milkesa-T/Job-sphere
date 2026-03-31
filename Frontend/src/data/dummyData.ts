@@ -15,6 +15,8 @@ export interface Job {
   postedAt: string;
   tags?: string[];
   requirements?: string[];
+  minSalary?: number;
+  maxSalary?: number;
 }
 
 export const dummyJobs: Job[] = [

@@ -75,3 +75,29 @@ export const createJob = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Update a job
+// @route   PUT /api/jobs/:id
+// @access  Private/Admin
+export const updateJob = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+
+    if (req.user.role !== "admin") {
+      return res.status(401).json({ message: "Not authorized as an admin" });
+    }
+
+    const updatedJob = await Job.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.json(updatedJob);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

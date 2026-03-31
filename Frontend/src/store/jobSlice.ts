@@ -151,6 +151,15 @@ export const deleteJobThunk = createAsyncThunk("admin/deleteJob", async (id: str
   }
 });
 
+export const deleteUserThunk = createAsyncThunk("admin/deleteUser", async (id: string, { rejectWithValue }) => {
+  try {
+    const response = await axios.delete(`/api/admin/users/${id}`);
+    return { id, message: response.data.message };
+  } catch (error: any) {
+    return rejectWithValue(error.response.data.message || "Failed to delete user");
+  }
+});
+
 export const createJobThunk = createAsyncThunk("admin/createJob", async (jobData: any, { rejectWithValue }) => {
   try {
     const response = await axios.post("/api/jobs", jobData);
@@ -159,6 +168,18 @@ export const createJobThunk = createAsyncThunk("admin/createJob", async (jobData
     return rejectWithValue(error.response.data.message || "Failed to create job");
   }
 });
+
+export const updateJobThunk = createAsyncThunk(
+  "admin/updateJob",
+  async ({ id, jobData }: { id: string; jobData: any }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`/api/jobs/${id}`, jobData);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data.message || "Failed to update job");
+    }
+  }
+);
 
 export const getDashboardStatsThunk = createAsyncThunk("admin/fetchStats", async (_, { rejectWithValue }) => {
   try {
@@ -195,6 +216,20 @@ export const loginUserThunk = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Login failed";
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const socialLoginThunk = createAsyncThunk(
+  "auth/socialLogin",
+  async (userData: { name: string; email: string; provider: string }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("/api/auth/social-login", userData);
+      localStorage.setItem("user", JSON.stringify(response.data));
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Social login failed";
       return rejectWithValue(message);
     }
   }
@@ -315,6 +350,21 @@ const jobSlice = createSlice({
       state.auth.error = action.payload as string;
     });
 
+    // Social Login Cases
+    builder.addCase(socialLoginThunk.pending, (state) => {
+      state.auth.status = "loading";
+      state.auth.error = null;
+    });
+    builder.addCase(socialLoginThunk.fulfilled, (state, action) => {
+      state.auth.status = "succeeded";
+      state.auth.user = action.payload;
+      state.auth.isAuthenticated = true;
+    });
+    builder.addCase(socialLoginThunk.rejected, (state, action) => {
+      state.auth.status = "failed";
+      state.auth.error = action.payload as string;
+    });
+
     // Get Me Cases
     builder.addCase(getMeThunk.fulfilled, (state, action) => {
       state.auth.user = { ...state.auth.user, ...action.payload };
@@ -369,12 +419,23 @@ const jobSlice = createSlice({
       state.jobs = state.jobs.filter((job) => (job as any)._id !== action.payload.id);
     });
 
+    builder.addCase(deleteUserThunk.fulfilled, (state, action) => {
+      state.admin.users = state.admin.users.filter((user) => user._id !== action.payload.id);
+    });
+
     builder.addCase(createJobThunk.fulfilled, (state, action) => {
       state.jobs.unshift(action.payload);
     });
 
     builder.addCase(getDashboardStatsThunk.fulfilled, (state, action) => {
       state.admin.stats = action.payload;
+    });
+
+    builder.addCase(updateJobThunk.fulfilled, (state, action) => {
+      const index = state.jobs.findIndex((job) => (job as any)._id === action.payload._id);
+      if (index !== -1) {
+        state.jobs[index] = action.payload;
+      }
     });
 
     builder.addCase(updateProfileThunk.fulfilled, (state, action) => {

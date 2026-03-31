@@ -19,6 +19,8 @@ import {
   deleteJobThunk, 
   updateApplicationStatusThunk,
   createJobThunk,
+  updateJobThunk,
+  deleteUserThunk,
   getDashboardStatsThunk
 } from "../store/jobSlice";
 import { type RootState, type AppDispatch } from "../store/store";
@@ -30,6 +32,7 @@ export default function AdminDashboard() {
 
   // State for creating a new job
   const [showJobModal, setShowJobModal] = useState(false);
+  const [editingJobId, setEditingJobId] = useState<string | null>(null);
   const [newJob, setNewJob] = useState({
     title: "",
     company: "",
@@ -62,10 +65,17 @@ export default function AdminDashboard() {
     e.preventDefault();
     const jobData = {
       ...newJob,
-      tags: newJob.tags.split(",").map(tag => tag.trim())
+      tags: typeof newJob.tags === 'string' ? newJob.tags.split(",").map(tag => tag.trim()) : newJob.tags
     };
-    dispatch(createJobThunk(jobData));
+
+    if (editingJobId) {
+      dispatch(updateJobThunk({ id: editingJobId, jobData }));
+    } else {
+      dispatch(createJobThunk(jobData));
+    }
+
     setShowJobModal(false);
+    setEditingJobId(null);
     setNewJob({
       title: "",
       company: "",
@@ -76,6 +86,21 @@ export default function AdminDashboard() {
       experienceLevel: "Junior",
       tags: ""
     });
+  };
+
+  const handleEditJobClick = (job: any) => {
+    setEditingJobId(job._id);
+    setNewJob({
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      type: job.type,
+      salary: job.salary || 0,
+      description: job.description,
+      experienceLevel: job.experienceLevel || "Junior",
+      tags: job.tags ? job.tags.join(", ") : ""
+    });
+    setShowJobModal(true);
   };
 
   const renderOverview = () => (
@@ -183,7 +208,20 @@ export default function AdminDashboard() {
           <p className="text-gray-500 dark:text-slate-400 text-sm">Create, edit and remove job postings.</p>
         </div>
         <button 
-          onClick={() => setShowJobModal(true)}
+          onClick={() => {
+            setEditingJobId(null);
+            setNewJob({
+              title: "",
+              company: "",
+              location: "",
+              type: "Full-time",
+              salary: 0,
+              description: "",
+              experienceLevel: "Junior",
+              tags: ""
+            });
+            setShowJobModal(true);
+          }}
           className="bg-primary text-white px-6 py-3 rounded-2xl font-black flex items-center gap-2 hover:bg-primary-dark transition-all shadow-lg shadow-blue-100 dark:shadow-primary/20"
         >
           <Plus size={20} /> Post New Job
@@ -219,11 +257,20 @@ export default function AdminDashboard() {
                 </td>
                 <td className="py-5 text-sm text-gray-600 dark:text-slate-400">{job.location}</td>
                 <td className="py-5 text-right">
-                  <button 
-                  onClick={() => handleDeleteJob(job._id)}
-                  className="p-2 text-gray-400 hover:text-red-500 transition-colors bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm">
-                    <Trash2 size={18} />
-                  </button>
+                  <div className="flex items-center justify-end gap-2">
+                    <button 
+                      onClick={() => handleEditJobClick(job)}
+                      className="p-2 text-gray-400 hover:text-primary transition-colors bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm"
+                    >
+                      <Briefcase size={18} />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteJob(job._id)}
+                      className="p-2 text-gray-400 hover:text-red-500 transition-colors bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -356,7 +403,14 @@ export default function AdminDashboard() {
                }`}>
                  {user.role}
                </span>
-               <button className="text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+               <button 
+                 onClick={() => {
+                   if (window.confirm(`Are you sure you want to delete user: ${user.name}?`)) {
+                     dispatch(deleteUserThunk(user._id));
+                   }
+                 }}
+                 className="text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                >
                  <Trash2 size={16} />
                </button>
             </div>
@@ -427,8 +481,10 @@ export default function AdminDashboard() {
           <div className="bg-white dark:bg-slate-900 rounded-[40px] w-full max-w-2xl overflow-hidden shadow-2xl dark:shadow-primary/10 border border-gray-100 dark:border-slate-800 transition-colors">
             <div className="p-10">
               <div className="flex justify-between items-center mb-10">
-                <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100">Post New Job</h2>
-                <button onClick={() => setShowJobModal(false)} className="bg-gray-50 dark:bg-slate-800 p-3 rounded-2xl text-gray-400 dark:text-slate-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+                <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100">
+                  {editingJobId ? "Edit Job Details" : "Post New Job"}
+                </h2>
+                <button onClick={() => { setShowJobModal(false); setEditingJobId(null); }} className="bg-gray-50 dark:bg-slate-800 p-3 rounded-2xl text-gray-400 dark:text-slate-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
                    <XCircle size={24} />
                 </button>
               </div>
@@ -511,7 +567,7 @@ export default function AdminDashboard() {
                   type="submit"
                   className="w-full bg-primary text-white py-5 rounded-2xl font-black text-lg hover:bg-primary-dark transition-all shadow-xl shadow-blue-100"
                 >
-                  Publish Job
+                  {editingJobId ? "Update Job Details" : "Publish Job"}
                 </button>
               </form>
             </div>

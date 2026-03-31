@@ -72,6 +72,43 @@ export const loginUser = async (req, res) => {
   }
 };
 
+// @desc    Social Login (Google, Facebook, LinkedIn, Apple)
+// @route   POST /api/auth/social-login
+// @access  Public
+export const socialLogin = async (req, res) => {
+  try {
+    const { email, name, provider } = req.body;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create new user if not exists
+      // We generate a random password since they are using social login
+      const tempPassword = crypto.randomBytes(20).toString("hex");
+      user = await User.create({
+        name,
+        email,
+        password: tempPassword,
+      });
+    }
+
+    if (user) {
+      res.json({
+        _id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        savedJobs: user.savedJobs,
+        token: generateToken(user._id),
+      });
+    } else {
+      res.status(400).json({ message: "Invalid user data" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @desc    Get user data
 // @route   GET /api/auth/me
 // @access  Private

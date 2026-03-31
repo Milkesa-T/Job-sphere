@@ -34,23 +34,31 @@ export default function MyApplications() {
           <div className="space-y-6">
             {userApplications.length > 0 ? (
               userApplications.map((app: any) => (
-                <div key={app._id} className="relative group">
-                  <JobCard job={app.job} />
-                  <div className="absolute top-4 right-16 flex flex-col items-end gap-2">
-                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                      app.status === 'pending' ? 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 border-yellow-100 dark:border-yellow-900/50' : 
-                      app.status === 'accepted' ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-green-100 dark:border-green-900/50' :
-                      app.status === 'rejected' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900/50' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/50'
-                    }`}>
-                      {app.status}
-                    </span>
-                    {app.feedback && (
-                      <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-3 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm text-xs text-gray-600 dark:text-slate-300 max-w-[200px] hidden group-hover:block transition-all">
-                        <p className="font-bold text-gray-400 dark:text-slate-500 uppercase text-[9px] mb-1">Feedback</p>
-                        "{app.feedback}"
-                      </div>
-                    )}
+                <div key={app._id} className="group mb-8">
+                  <div className="flex items-center justify-between bg-white dark:bg-slate-900 px-6 py-4 rounded-t-2xl border border-b-0 border-gray-100 dark:border-slate-800">
+                    <span className="text-xs font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Application Status</span>
+                    <div className="flex items-center gap-4">
+                      {app.feedback && (
+                        <span className="text-xs italic text-gray-500 dark:text-slate-400 hidden md:block">"{app.feedback}"</span>
+                      )}
+                      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                        app.status === 'pending' ? 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 border-yellow-100 dark:border-yellow-900/50' : 
+                        app.status === 'accepted' ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-green-100 dark:border-green-900/50' :
+                        app.status === 'rejected' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900/50' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/50'
+                      }`}>
+                        {app.status}
+                      </span>
+                    </div>
                   </div>
+                  {app.job ? (
+                    <div className="[&>div]:rounded-t-none [&>div]:border-t-0">
+                      <JobCard job={app.job} />
+                    </div>
+                  ) : (
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-b-2xl border border-gray-100 dark:border-slate-800 text-gray-500 text-center border-t-0">
+                      This job is no longer available.
+                    </div>
+                  )}
                 </div>
               ))
             ) : (

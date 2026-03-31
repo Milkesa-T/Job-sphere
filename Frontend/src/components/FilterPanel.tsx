@@ -7,6 +7,12 @@ interface FilterPanelProps {
   setExperienceLevel: (level: string) => void;
   location: string;
   setLocation: (loc: string) => void;
+  datePosted: string;
+  setDatePosted: (date: string) => void;
+  minSalary: string;
+  setMinSalary: (val: string) => void;
+  maxSalary: string;
+  setMaxSalary: (val: string) => void;
   resetFilters: () => void;
 }
 
@@ -17,6 +23,12 @@ export default function FilterPanel({
   setExperienceLevel,
   location,
   setLocation,
+  datePosted,
+  setDatePosted,
+  minSalary,
+  setMinSalary,
+  maxSalary,
+  setMaxSalary,
   resetFilters,
 }: FilterPanelProps) {
   const jobTypes = [
@@ -57,11 +69,15 @@ export default function FilterPanel({
           Date Posted
         </label>
         <div className="relative">
-          <select className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl px-4 py-3 appearance-none text-sm text-gray-600 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary/20 transition-all">
-            <option>Last 24 hours</option>
-            <option>Last 7 days</option>
-            <option>Last 30 days</option>
-            <option>Any time</option>
+          <select 
+            value={datePosted}
+            onChange={(e) => setDatePosted(e.target.value)}
+            className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl px-4 py-3 appearance-none text-sm text-gray-600 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+          >
+            <option value="Any time">Any time</option>
+            <option value="Last 24 hours">Last 24 hours</option>
+            <option value="Last 7 days">Last 7 days</option>
+            <option value="Last 30 days">Last 30 days</option>
           </select>
           <ChevronDown
             className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -156,8 +172,10 @@ export default function FilterPanel({
               From
             </span>
             <input
-              type="text"
+              type="number"
               placeholder="$20"
+              value={minSalary}
+              onChange={(e) => setMinSalary(e.target.value)}
               className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-gray-600 dark:text-slate-300 outline-none"
             />
           </div>
@@ -166,8 +184,10 @@ export default function FilterPanel({
               To
             </span>
             <input
-              type="text"
+              type="number"
               placeholder="$2000"
+              value={maxSalary}
+              onChange={(e) => setMaxSalary(e.target.value)}
               className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-gray-600 dark:text-slate-300 outline-none"
             />
           </div>

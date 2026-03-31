@@ -22,30 +22,36 @@ export default function Navbar() {
 
           {/* Desktop Center Links (Hidden on mobile) */}
           <div className="hidden md:flex items-center gap-8">
-            <Link
-              to="/"
-              className="text-gray-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors font-medium"
-            >
-              Job Search
-            </Link>
-            <Link
-              to="/my-applications"
-              className="text-gray-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors font-medium"
-            >
-              My Applications
-            </Link>
+            {auth.user?.role !== "admin" && (
+              <Link
+                to="/"
+                className="text-gray-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors font-medium"
+              >
+                Job Search
+              </Link>
+            )}
+            {auth.isAuthenticated && auth.user?.role !== "admin" && (
+              <Link
+                to="/my-applications"
+                className="text-gray-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors font-medium"
+              >
+                My Applications
+              </Link>
+            )}
             <Link
               to="/companies"
               className="text-gray-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors font-medium"
             >
               Companies
             </Link>
-            <Link
-              to="/contact"
-              className="text-gray-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors font-medium"
-            >
-              Contact Us
-            </Link>
+            {auth.user?.role !== "admin" && (
+              <Link
+                to="/contact"
+                className="text-gray-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors font-medium"
+              >
+                Contact Us
+              </Link>
+            )}
             {auth.user?.role === "admin" && (
               <Link
                 to="/admin"

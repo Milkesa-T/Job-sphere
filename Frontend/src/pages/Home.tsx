@@ -21,6 +21,9 @@ export default function Home() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState("All");
   const [filterLocation, setFilterLocation] = useState("");
+  const [datePosted, setDatePosted] = useState("Any time");
+  const [minSalary, setMinSalary] = useState<string>("");
+  const [maxSalary, setMaxSalary] = useState<string>("");
 
   // Debounce the search values
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -36,8 +39,11 @@ export default function Home() {
     setSelectedTypes([]);
     setExperienceLevel("All");
     setFilterLocation("");
+    setDatePosted("Any time");
     setSearchQuery("");
     setLocationQuery("");
+    setMinSalary("");
+    setMaxSalary("");
   };
 
   // Filter jobs based on all criteria
@@ -68,11 +74,27 @@ export default function Home() {
       const matchesExperience = 
         experienceLevel === "All" || empExp === experienceLevel;
 
-      // Basic salary match for demonstration
-      // We assume the range slider is for yearly salary / 100 for visual simplicity
-      return matchesSearch && matchesLocation && matchesFilterLocation && matchesType && matchesExperience;
+      let matchesDate = true;
+      if (datePosted !== "Any time") {
+        const jobDate = new Date(job.createdAt || Date.now());
+        const now = new Date();
+        const diffTime = Math.abs(now.getTime() - jobDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+        
+        if (datePosted === "Last 24 hours") matchesDate = diffDays <= 1;
+        else if (datePosted === "Last 7 days") matchesDate = diffDays <= 7;
+        else if (datePosted === "Last 30 days") matchesDate = diffDays <= 30;
+      }
+
+      const jobMinSal = Number(job.minSalary || job.salary || 0);
+      const jobMaxSal = Number(job.maxSalary || job.salary || 999999);
+
+      const matchesMinSalary = minSalary === "" || jobMaxSal >= Number(minSalary);
+      const matchesMaxSalary = maxSalary === "" || jobMinSal <= Number(maxSalary);
+
+      return matchesSearch && matchesLocation && matchesFilterLocation && matchesType && matchesExperience && matchesDate && matchesMinSalary && matchesMaxSalary;
     });
-  }, [jobs, debouncedSearch, debouncedLocation, debouncedFilterLocation, selectedTypes, experienceLevel]);
+  }, [jobs, debouncedSearch, debouncedLocation, debouncedFilterLocation, selectedTypes, experienceLevel, datePosted, minSalary, maxSalary]);
 
   return (
     <div className="pb-20">
@@ -113,6 +135,12 @@ export default function Home() {
                 setExperienceLevel={setExperienceLevel}
                 location={filterLocation}
                 setLocation={setFilterLocation}
+                datePosted={datePosted}
+                setDatePosted={setDatePosted}
+                minSalary={minSalary}
+                setMinSalary={setMinSalary}
+                maxSalary={maxSalary}
+                setMaxSalary={setMaxSalary}
                 resetFilters={resetFilters}
               />
             </div>
